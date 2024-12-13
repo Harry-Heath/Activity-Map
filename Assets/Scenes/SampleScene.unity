@@ -2451,7 +2451,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _entityMaterial: {fileID: 2100000, guid: f396e486c43937c4da089690e7c0c0ac, type: 2}
-  _chunkMaterial: {fileID: 2100000, guid: 61ae83c9a8693fb4c9578acee143ee2c, type: 2}
+  _chunkMaterial: {fileID: 2100000, guid: 03965609de23d8440a8ebe2b29a041ff, type: 2}
   _quantity:
     x: 5
     y: 5
@@ -2459,8 +2459,8 @@ MonoBehaviour:
     x: 20
     y: 20
   _chunkResolution:
-    x: 1024
-    y: 1024
+    x: 128
+    y: 128
 --- !u!4 &320532215
 Transform:
   m_ObjectHideFlags: 0

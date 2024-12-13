@@ -8,13 +8,14 @@ public class Chunk : MonoBehaviour
 {
 	private Map _map;
 	private RenderTexture _renderTexture;
-	private Matrix4x4 _matrix;
+	private Matrix4x4 _proj;
+	private Matrix4x4 _view;
 	private readonly List<Entity> _entities = new();
 
 	public void Initialise(Map map, int2 coords, int2 size, int2 resolution)
 	{
 		_map = map;
-		_renderTexture = new(resolution.x, resolution.y, 16);
+		_renderTexture = new(resolution.x + 1, resolution.y + 1, 16);
 
 		// Setup game object
 		float2 pos = coords * size;
@@ -23,16 +24,18 @@ public class Chunk : MonoBehaviour
 		transform.parent = map.transform;
 		gameObject.name = $"Chunk ({coords.x}, {coords.y})";
 
-		// Create matrix
-		_matrix = Matrix4x4.Ortho(0, size.x, 0, size.y, -100, 100)
-			* Matrix4x4.TRS(transform.position, Quaternion.Euler(90, 0, 0), Vector3.one).inverse;
+		// Create matrices
+		float2 scale = size * ((resolution + 1) / (float2)resolution); // Transform size from cell to pixels
+		float2 offset = pos - (0.5f * (size / (float2)resolution));    // Offset position by half a cell
+		_view = Matrix4x4.TRS(new(offset.x, 0, offset.y), Quaternion.Euler(90, 0, 0), Vector3.one).inverse;
+		_proj = Matrix4x4.Ortho(0, scale.x, 0, scale.y, -100, 100);
 
 		// Add quad
 		var meshFilter = gameObject.AddComponent<MeshFilter>();
 		var meshCollider = gameObject.AddComponent<MeshCollider>();
 		var meshRenderer = gameObject.AddComponent<MeshRenderer>();
-		meshFilter.sharedMesh = Quad.GetMesh();
-		meshCollider.sharedMesh = Quad.GetMesh();
+		meshFilter.sharedMesh = Quad.GetMesh(resolution);
+		meshCollider.sharedMesh = Quad.GetMesh(resolution);
 		meshRenderer.sharedMaterial = map.ChunkMaterial;
 		
 		// Set texture
@@ -52,8 +55,8 @@ public class Chunk : MonoBehaviour
 
 		cmd.SetRenderTarget(_renderTexture);
 		cmd.ClearRenderTarget(true, false, Color.clear);
-		cmd.SetViewMatrix(Matrix4x4.identity);
-		cmd.SetProjectionMatrix(_matrix);
+		cmd.SetViewMatrix(_view);
+		cmd.SetProjectionMatrix(_proj);
 
 		foreach (Entity entity in _entities)
 		{
