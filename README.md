@@ -1,1 +1,1 @@
-![](./.github/activity.webp)
+![](./.github/activity-map.webp)
