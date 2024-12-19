@@ -1,92 +1,92 @@
 Shader "Instanced Colour Shader"
 {
-    Properties
-    { }
+	Properties
+	{ }
 
-    SubShader
-    {
-        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalRenderPipeline" }
+	SubShader
+	{
+		Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalRenderPipeline" }
 
-        HLSLINCLUDE
+		HLSLINCLUDE
 
-        #pragma multi_compile_instancing
+		#pragma multi_compile_instancing
 
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+		#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 
-        struct Attributes
-        {
-            float4 positionOS : POSITION;
-            uint instanceID : SV_InstanceID;
-        };
+		struct Attributes
+		{
+			float4 positionOS : POSITION;
+			uint instanceID : SV_InstanceID;
+		};
 
-        struct Varyings
-        {
-            float4 positionHCS  : SV_POSITION;
-            float4 colour : COLOR;
-        };
+		struct Varyings
+		{
+			float4 positionHCS  : SV_POSITION;
+			float4 colour : COLOR;
+		};
 
-        float4 _Colours[128];
+		StructuredBuffer<float2> _Colours;
 
-        Varyings vert(Attributes IN)
-        {
-            UNITY_SETUP_INSTANCE_ID(IN);
+		Varyings vert(Attributes IN)
+		{
+			UNITY_SETUP_INSTANCE_ID(IN);
 
-            Varyings OUT;
-            OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
-            OUT.colour = _Colours[IN.instanceID];
-            return OUT;
-        }
+			Varyings OUT;
+			OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
+			OUT.colour = float4(_Colours[IN.instanceID], 0, 1);
+			return OUT;
+		}
 
-        float4 frag(Varyings IN) : SV_Target
-        {
-            return IN.colour;
-        }
+		float4 frag(Varyings IN) : SV_Target
+		{
+			return IN.colour;
+		}
 
-        ENDHLSL
+		ENDHLSL
 
-        Pass
-        {
-            Name "Forward"
+		Pass
+		{
+			Name "Forward"
 			Tags { "LightMode"="UniversalForwardOnly" }
 
-            HLSLPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            ENDHLSL
-        }
+			HLSLPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			ENDHLSL
+		}
 
-        Pass
-        {
-            Name "DepthOnly"
+		Pass
+		{
+			Name "DepthOnly"
 			Tags { "LightMode"="DepthOnly" }
 
-            HLSLPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            ENDHLSL
-        }
+			HLSLPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			ENDHLSL
+		}
 
-        Pass
-        {
-            Name "ShadowCaster"
+		Pass
+		{
+			Name "ShadowCaster"
 			Tags { "LightMode"="ShadowCaster" }
 
-            HLSLPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            ENDHLSL
-        }
+			HLSLPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			ENDHLSL
+		}
 
-        Pass
-        {
-            Name "DepthNormals"
+		Pass
+		{
+			Name "DepthNormals"
 			Tags { "LightMode"="DepthNormalsOnly" }
 
-            HLSLPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            ENDHLSL
-        }
-    }
+			HLSLPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			ENDHLSL
+		}
+	}
 }

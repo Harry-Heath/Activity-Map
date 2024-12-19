@@ -1,96 +1,96 @@
 Shader "Chunk Shader"
 {
-    Properties
-    {
-        _BaseMap("Base Map", 2D) = "white"
-    }
+	Properties
+	{
+		_BaseMap("Base Map", 2D) = "white"
+	}
 
-    SubShader
-    {
-        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalRenderPipeline" }
+	SubShader
+	{
+		Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalRenderPipeline" }
 
-        HLSLINCLUDE
+		HLSLINCLUDE
 
-        #pragma multi_compile_instancing
+		#pragma multi_compile_instancing
 
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+		#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 
-        struct Attributes
-        {
-            float4 pos : POSITION;
-            float2 uv  : TEXCOORD0;
-        };
+		struct Attributes
+		{
+			float4 pos : POSITION;
+			float2 uv  : TEXCOORD0;
+		};
 
-        struct Varyings
-        {
-            float4 pos : SV_POSITION;
-            float4 colour : COLOR;
-        };
+		struct Varyings
+		{
+			float4 pos : SV_POSITION;
+			float4 colour : COLOR;
+		};
 
-        TEXTURE2D(_BaseMap);
-        SAMPLER(sampler_BaseMap);
+		TEXTURE2D(_BaseMap);
+		SAMPLER(sampler_BaseMap);
 
-        Varyings vert(Attributes IN)
-        {
-            Varyings OUT;
-            OUT.colour = SAMPLE_TEXTURE2D_LOD(_BaseMap, sampler_BaseMap, IN.uv, 0);
+		Varyings vert(Attributes IN)
+		{
+			Varyings OUT;
+			OUT.colour = SAMPLE_TEXTURE2D_LOD(_BaseMap, sampler_BaseMap, IN.uv, 0);
 
-            IN.pos.y += saturate(1 - length(OUT.colour));
+			IN.pos.y += saturate(1 - length(OUT.colour));
 
-            OUT.pos = TransformObjectToHClip(IN.pos.xyz);
-            return OUT;
-        }
+			OUT.pos = TransformObjectToHClip(IN.pos.xyz);
+			return OUT;
+		}
 
-        float4 frag(Varyings IN) : SV_Target
-        {
-            return IN.colour;
-        }
+		float4 frag(Varyings IN) : SV_Target
+		{
+			return IN.colour;
+		}
 
-        ENDHLSL
+		ENDHLSL
 
-        Pass
-        {
-            Name "Forward"
+		Pass
+		{
+			Name "Forward"
 			Tags { "LightMode"="UniversalForwardOnly" }
 
-            HLSLPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            ENDHLSL
-        }
+			HLSLPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			ENDHLSL
+		}
 
-        Pass
-        {
-            Name "DepthOnly"
+		Pass
+		{
+			Name "DepthOnly"
 			Tags { "LightMode"="DepthOnly" }
 
-            HLSLPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            ENDHLSL
-        }
+			HLSLPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			ENDHLSL
+		}
 
-        Pass
-        {
-            Name "ShadowCaster"
+		Pass
+		{
+			Name "ShadowCaster"
 			Tags { "LightMode"="ShadowCaster" }
 
-            HLSLPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            ENDHLSL
-        }
+			HLSLPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			ENDHLSL
+		}
 
-        Pass
-        {
-            Name "DepthNormals"
+		Pass
+		{
+			Name "DepthNormals"
 			Tags { "LightMode"="DepthNormalsOnly" }
 
-            HLSLPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            ENDHLSL
-        }
-    }
+			HLSLPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			ENDHLSL
+		}
+	}
 }

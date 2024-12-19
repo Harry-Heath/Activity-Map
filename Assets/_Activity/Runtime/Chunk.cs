@@ -10,7 +10,10 @@ public class Chunk : MonoBehaviour
 	private RenderTexture _renderTexture;
 	private Matrix4x4 _proj;
 	private Matrix4x4 _view;
-	private readonly List<Entity> _entities = new();
+	private MaterialPropertyBlock _properties;
+	private ComputeBuffer _buf;
+	private readonly Dictionary<Mesh, Instances> _instances = new();
+	private bool _shouldRender = false;
 
 	public void Initialise(Map map, int2 coords, int2 size, int2 resolution)
 	{
@@ -42,32 +45,77 @@ public class Chunk : MonoBehaviour
 		MaterialPropertyBlock block = new();
 		block.SetTexture("_BaseMap", _renderTexture);
 		meshRenderer.SetPropertyBlock(block);
+
+		// Setup properties
+		_buf = new ComputeBuffer(Instances.Max, 2 * sizeof(float));
+		_properties = new();
+		_properties.SetBuffer("_Colours", _buf);
 	}
 
 	public void QueueForRender(Entity entity)
 	{
-		_entities.Add(entity);
+		if (!_instances.TryGetValue(entity.Mesh, out Instances instances))
+		{
+			instances = new();
+			_instances[entity.Mesh] = instances;
+		}
+
+		instances.Add(entity.Matrix, entity.Colour);
+		_shouldRender = true;
 	}
 
 	public void Render(CommandBuffer cmd)
 	{
-		if (_entities.Count == 0) return;
+		if (!_shouldRender) return;
 
 		cmd.SetRenderTarget(_renderTexture);
 		cmd.ClearRenderTarget(true, false, Color.clear);
 		cmd.SetViewMatrix(_view);
 		cmd.SetProjectionMatrix(_proj);
 
-		foreach (Entity entity in _entities)
+		foreach ((Mesh mesh, Instances instances) in _instances)
 		{
-			cmd.DrawMesh(entity.Mesh, entity.Matrix, _map.EntityMaterial, 0, 0, entity.Properties);
+			if (instances.Count == 0) continue;
+
+			cmd.SetBufferData(_buf, instances.Colours, 0, 0, instances.Count);
+			cmd.DrawMeshInstanced(mesh, 0, _map.EntityMaterial, 0, instances.Transforms, instances.Count, _properties);
+
+			instances.Clear();
 		}
 
-		_entities.Clear();
+		_shouldRender = false;
 	}
 
 	private void OnDestroy()
 	{
 		_renderTexture.Release();
+		_buf.Release();
+	}
+}
+
+class Instances
+{
+	public const int Max = 1023;
+
+	private Matrix4x4[] _transforms = new Matrix4x4[Max];
+	private Vector2[] _colours = new Vector2[Max];
+	private int _index = 0;
+
+	public int Count => _index;
+	public Matrix4x4[] Transforms => _transforms;
+	public Vector2[] Colours => _colours;
+
+	public void Add(Matrix4x4 transform, Vector2 colour)
+	{
+		if (_index == Max) return;
+
+		_transforms[_index] = transform;
+		_colours[_index] = colour;
+		_index++;
+	}
+
+	public void Clear()
+	{
+		_index = 0;
 	}
 }

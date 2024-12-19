@@ -6,23 +6,21 @@ public class Entity : MonoBehaviour
 {
 	private Rigidbody _rb;
 	private Mesh _mesh;
-	private MaterialPropertyBlock _properties;
+	private Vector4 _colour;
 
 	public Mesh Mesh => _mesh;
 	public Matrix4x4 Matrix => transform.localToWorldMatrix;
-	public MaterialPropertyBlock Properties => _properties;
+	public Vector4 Colour => _colour;
 
 	private void OnEnable()
 	{
 		_rb = GetComponent<Rigidbody>();
 		_mesh = GetComponent<MeshFilter>().sharedMesh;
-		_properties = new();
 	}
 
 	private void Update()
 	{
 		Map.Instance.QueueForRender(this);
-		Color colour = new(_rb.velocity.x, _rb.velocity.z, 0, 0);
-		_properties.SetColor("_Color", colour);
+		_colour = new(_rb.velocity.x, _rb.velocity.z, 0, 0);
 	}
 }
