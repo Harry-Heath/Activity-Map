@@ -69,6 +69,11 @@ public static class Quad
 		mesh.SetVertices(vertices);
 		mesh.SetUVs(0, uvs);
 		mesh.SetNormals(normals);
+
+		mesh.indexFormat = (vertexCount > short.MaxValue) 
+			? UnityEngine.Rendering.IndexFormat.UInt32 
+			: UnityEngine.Rendering.IndexFormat.UInt16;
+
 		mesh.SetTriangles(triangles, 0);
 
 		_meshes[resolution] = mesh;
