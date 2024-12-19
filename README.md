@@ -1,4 +1,6 @@
-![](./.github/instanced.webp)
+432 rigidbodies running at around ~220fps:
+
+![](./.github/instanced2.webp)
 
 ![](./.github/activity-map2.webp)
 
